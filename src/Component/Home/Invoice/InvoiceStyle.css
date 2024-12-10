@@ -1,0 +1,60 @@
+@media print {
+  @page {
+    size: A4; /* US letter */
+    margin-left: 6mm;
+    margin-right: 6mm;
+    margin-top: 6mm;
+    margin-bottom: 6mm;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  footer {
+    display: inline-block;
+  }
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #fafafa;
+}
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+
+.invoice-container {
+  @apply relative border-2 bg-white overflow-hidden;
+  width: 210mm;
+  min-height: 280mm;
+  padding: 1mm;
+  margin: auto;
+  /* border: 1px #d3d3d3 solid; */
+  /* border-radius: 5px; */
+  background: white;
+  /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); */
+}
+
+.invoice-container th,
+.invoice-container tr,
+.invoice-container td {
+  @apply rounded-none;
+}
+
+.invoice-container th.capitalize {
+  white-space: unset;
+}
+
+.acknowledgement {
+  background-color: hsl(var(--b2, var(--b1)) / var(--tw-bg-opacity));
+}
+
+#page-number {
+  text-align: right;
+  font-weight: lighter;
+}

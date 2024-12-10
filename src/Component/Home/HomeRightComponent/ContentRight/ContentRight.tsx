@@ -411,9 +411,19 @@ const ContentRight = () => {
     return (
       <div>
         <label
-          onClick={() => editItem(item)}
+          onClick={() => {
+            if (
+              !(item["loading_sign"] !== null || item["unload_sign"] !== null)
+            ) {
+              editItem(item);
+            }
+          }}
           htmlFor="modal-edit"
-          className="btn modal-button btn-square btn-sm"
+          className={`btn modal-button btn-square btn-sm ${
+            item["loading_sign"] !== null || item["unload_sign"] !== null
+              ? "btn-disabled"
+              : ""
+          }`}
         >
           <BsPenFill size={16} />
         </label>
@@ -763,7 +773,8 @@ const ContentRight = () => {
       )}
       <div
         className="overflow-y-auto "
-        style={{ height: "calc(100vh - 200px)" }}
+        // style={{ height: "calc(100vh - 200px)" }}
+        style={{ maxHeight: "84vh" }}
       >
         <table className="table w-full">
           <thead>

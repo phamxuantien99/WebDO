@@ -99,4 +99,7 @@ export const api = {
     issue_date?: string
   ) =>
     `/logistic/update_detail?invoice_id=${invoice_id}&project_code=${project_code}&fab_year=${fab_year}&contact_person=${contact_person}&contact_number=${contact_number}&driver_mode=${driver_mode}&client_ref=${clien_ref}&remark=${remark}&issue_date=${issue_date}`,
+
+  getFabYearById: (invoice_id: number) =>
+    `/logistic/update/get-fab-year-by-id/${invoice_id}`,
 };

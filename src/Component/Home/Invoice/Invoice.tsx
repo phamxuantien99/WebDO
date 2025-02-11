@@ -1,18 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import React, { CSSProperties, useRef, useState } from "react";
 import { FcPrint } from "react-icons/fc";
 import { useLocation, useParams } from "react-router-dom";
 import { FadeLoader } from "react-spinners";
 import { useReactToPrint } from "react-to-print";
-import { api } from "../../service/api/endpoint";
-import "./InvoiceStyle.css";
-import UseRefreshToken from "../../service/hooks/useRefreshToken";
 import logo2 from "../../../assets/images/logo2.png";
-import {
-  axiosInstance,
-  axiosInstanceV2,
-} from "../../service/hooks/axiosInstance";
+import { api } from "../../service/api/endpoint";
+import { axiosInstanceV2 } from "../../service/hooks/axiosInstance";
+import UseRefreshToken from "../../service/hooks/useRefreshToken";
+import "./InvoiceStyle.css";
 
 const override: CSSProperties = {
   display: "flex",

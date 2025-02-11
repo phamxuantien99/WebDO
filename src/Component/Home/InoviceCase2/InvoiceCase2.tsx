@@ -39,7 +39,7 @@ function InvoiceCase2() {
   const data = useLocation().state;
   const [showText, setShowText] = useState(false);
   const invoiceContentRef = useRef<any>();
-
+  console.log({ data });
   const _handlePrint = useReactToPrint({
     content: () => invoiceContentRef.current,
     documentTitle: "Statement",

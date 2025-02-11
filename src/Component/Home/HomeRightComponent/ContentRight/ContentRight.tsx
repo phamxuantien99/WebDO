@@ -1,4 +1,11 @@
-import { CSSProperties, useContext, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { BsEyeFill, BsPenFill } from "react-icons/bs";
@@ -108,7 +115,6 @@ const ContentRight = () => {
     invoice_id: 0,
   };
 
-  const debounceSearchValue = useDebounce(edit.fab_year, 1000);
   const [listSerialNumber, setListSerialNumber] = useState<string[]>([]);
 
   const [selectedSerialNumber, setSelectedSerialNumber] = useState<any>([]);
@@ -121,7 +127,7 @@ const ContentRight = () => {
     setListSerialNumber([]);
     setSelectedComponent([]);
     setAdditionalComponents([]);
-  }, [debounceSearchValue]);
+  }, [edit.project_code]);
 
   const getSelectedSerialNumber = (event: any) => {
     const { value, checked } = event.target;
@@ -208,19 +214,82 @@ const ContentRight = () => {
     }
   };
 
-  const getAdditionalComponents = (e: any, serial: any) => {
+  // console.log({ additionalComponents });
+
+  // get additional component
+  // const getAdditionalComponents = (e: any, serial: any) => {
+  //   const objIndex = additionalComponents.findIndex(
+  //     (obj: any) => obj.serial_no === serial
+  //   );
+  //   let newArray = [...additionalComponents];
+  //   if (e.target.value !== "") {
+  //     newArray[objIndex].additional_component = e.target.value;
+  //   } else {
+  //     newArray[objIndex].additional_component = "";
+  //   }
+  //   setAdditionalComponents(newArray);
+  // };
+
+  const getAdditionalComponents = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    serial: string
+  ) => {
+    const value = e.target.value;
+
+    // Tìm xem serial_no đã tồn tại trong mảng chưa
     const objIndex = additionalComponents.findIndex(
-      (obj: any) => obj.serial_no === serial
+      (obj) => obj.serial_no === serial
     );
+
     let newArray = [...additionalComponents];
-    if (e.target.value !== "") {
-      newArray[objIndex].additional_component = e.target.value;
+
+    if (objIndex !== -1) {
+      // Nếu đã tồn tại, cập nhật giá trị
+      newArray[objIndex].additional_component = value;
     } else {
-      newArray[objIndex].additional_component = "";
+      // Nếu chưa tồn tại, thêm mới phần tử
+      newArray.push({ serial_no: serial, additional_component: value });
     }
+
     setAdditionalComponents(newArray);
   };
 
+  console.log({ object: additionalComponents });
+
+  // call api get fab year by id
+  const fetchFabYearById = async (invoice_id: number) => {
+    try {
+      const response = await axiosInstanceV2.get(
+        api.getFabYearById(invoice_id)
+      );
+
+      return response.data;
+    } catch (error) {
+      alert("Failed to fetch data Fab Year");
+    }
+  };
+
+  const { data: dataFabYear, isLoading: isLoadingFabYear } = useQuery({
+    queryKey: ["dataFabYear", edit.invoice_id],
+    queryFn: () => fetchFabYearById(edit.invoice_id),
+    refetchOnWindowFocus: false,
+    enabled: !!edit.invoice_id, // API chỉ được gọi khi edit.fab_year không phải là chuỗi rỗng
+  });
+
+  useEffect(() => {
+    if (dataFabYear) {
+      // Chỉ cập nhật khi dataFabYear có dữ liệu
+      setEdit((prev: any) => ({
+        ...prev,
+        fab_year: dataFabYear.fab_year,
+      }));
+    }
+  }, [dataFabYear]);
+
+  console.log("fab year", dataFabYear);
+  console.log("object", edit.fab_year);
+
+  // call api get component by project code
   const fetchDataLogisticComponent = async (
     invoice_id: number,
     project_code: string,
@@ -232,7 +301,10 @@ const ContentRight = () => {
 
     try {
       const response = await axiosInstanceV2.get(
-        api.getComponentByProjectCodeV2(invoice_id, project_code, year)
+        api.getComponentByProjectCodeV2(invoice_id, project_code, year),
+        {
+          headers,
+        }
       );
       return response.data;
     } catch (error: any) {
@@ -245,16 +317,98 @@ const ContentRight = () => {
   };
 
   const { data: dataTotalProduct, isLoading: isLoadingComponent } = useQuery({
-    queryKey: ["dataComponentV2", debounceSearchValue],
+    queryKey: [
+      "dataComponentV2",
+      edit?.invoice_id,
+      edit?.project_code,
+      edit?.fab_year,
+    ],
     queryFn: () =>
       fetchDataLogisticComponent(
         edit.invoice_id,
         edit.project_code,
-        debounceSearchValue
+        edit.fab_year
       ),
     refetchOnWindowFocus: false,
-    enabled: !!debounceSearchValue, // API chỉ được gọi khi edit.fab_year không phải là chuỗi rỗng
+    enabled: !!edit?.fab_year && !!edit?.invoice_id && !!edit?.project_code, // Chỉ gọi API khi fab_year đã có
   });
+
+  // call api for product detail
+  const fetchDataDetail = async (id: number) => {
+    try {
+      return await axiosInstanceV2
+        .get(api.getDataDetailLogisticV2(id))
+        .then((res) => res.data);
+    } catch (error) {
+      return { error: "Failed to fetch data" };
+    }
+  };
+
+  const { data: dataProductDetail, isLoading: isLoadingProductDetail } =
+    useQuery({
+      queryKey: ["dataDetailProduct", edit?.invoice_id],
+      queryFn: () => fetchDataDetail(edit?.invoice_id as any),
+      enabled: !!edit?.invoice_id,
+    });
+  // filter data để láy cho việc checkbox của serial_no
+  const filteredData = useMemo(() => {
+    if (!dataProductDetail) return [];
+
+    return dataProductDetail?.data?.filter(
+      (item: any) => item.delivery_no === dataProductDetail.delivery_order_ref
+    );
+  }, [dataProductDetail]);
+
+  useEffect(() => {
+    if (filteredData?.length > 0) {
+      const serialNumbers = filteredData.map((item: any) => item.serial_no);
+
+      // Xóa duplicate nếu cần và cập nhật state
+      const uniqueSerialNumbers = Array.from(new Set(serialNumbers));
+      setSelectedSerialNumber(uniqueSerialNumbers);
+    }
+  }, [filteredData]);
+
+  // lấy components từ data trả về để fill vào giá trị cho việc hiển thị checkbox
+  useEffect(() => {
+    const resultMain: any = [];
+    const resultOtherOption: any = [];
+
+    filteredData?.forEach((item: any) => {
+      item?.sub_components?.forEach((component: string) => {
+        // Kiểm tra nếu component là một trong các giá trị cần xử lý
+        if (
+          [
+            "Shutterhood",
+            "Barrel",
+            "Slat",
+            "Bottom Bar",
+            "Side Guide",
+            "Cover",
+            "Motor",
+            "Accessories",
+            "Key No",
+          ].includes(component)
+        ) {
+          // Nếu có, thực hiện logic thêm vào result
+          resultMain.push({
+            serial_no: item.serial_no,
+            components: [component],
+          });
+        } else {
+          // Nếu không, lưu vào otherResult
+          resultOtherOption.push({
+            serial_no: item.serial_no,
+            additional_component: component,
+          });
+        }
+      });
+    });
+
+    // Sau khi hoàn thành việc xử lý, bạn có thể set lại state hoặc thực hiện các bước tiếp theo
+    setSelectedComponent(resultMain);
+    setAdditionalComponents(resultOtherOption);
+  }, [filteredData]);
 
   const validateOptionsSerial = () => {
     const newErrors: InputErrors = {};
@@ -279,7 +433,7 @@ const ContentRight = () => {
   };
 
   const mergedData = Object.values(
-    selectedComponent.reduce((acc: any, currentValue: any) => {
+    selectedComponent?.reduce((acc: any, currentValue: any) => {
       if (!acc[currentValue.serial_no]) {
         // Nếu serial_no chưa tồn tại trong accumulator, khởi tạo một đối tượng mới
         acc[currentValue.serial_no] = {
@@ -319,7 +473,7 @@ const ContentRight = () => {
       remark: item["remark"],
       project_code: item["project_code"],
       invoice_id: item["invoice_id"],
-      fab_year: "",
+      fab_year: item["fab_year"],
     };
     setSelectedSerialNumber([]);
     setListSerialNumber([]);
@@ -332,6 +486,8 @@ const ContentRight = () => {
     document.getElementById("close")?.click();
     setEdit(defaultEdit);
   };
+
+  console.log("invoice_id", edit.invoice_id);
 
   const updateInvoiceFormRef = useRef(null);
 
@@ -407,6 +563,8 @@ const ContentRight = () => {
     }
   };
 
+  // console.log({ listSerialNumber });
+
   const renderUpdateModal = (item: any) => {
     return (
       <div>
@@ -435,6 +593,13 @@ const ContentRight = () => {
               id="close"
               htmlFor="modal-edit"
               className="btn btn-sm btn-circle absolute right-2 top-2"
+              onClick={() => {
+                // Reset lại state khi đóng modal
+                setEdit((prev: any) => ({
+                  ...prev,
+                  invoice_id: 0,
+                }));
+              }}
             >
               ✕
             </label>
@@ -470,19 +635,25 @@ const ContentRight = () => {
                     <label className="block text-gray-700 text-sm font-bold mb-2">
                       Year
                     </label>
-                    <input
-                      required
-                      value={edit.fab_year}
-                      onChange={(event) =>
-                        setEdit((prev: any) => ({
-                          ...prev,
-                          fab_year: event.target.value || edit.fab_year,
-                        }))
-                      }
-                      type="number"
-                      placeholder="Contact person"
-                      className="input input-bordered w-full"
-                    />
+                    {isLoadingFabYear ? (
+                      <FadeLoader
+                        loading={isLoadingFabYear}
+                        cssOverride={overrideSerial}
+                        color="red"
+                        aria-label="Loading Spinner"
+                        data-testid="loader"
+                      />
+                    ) : (
+                      <input
+                        required
+                        // value={edit.fab_year}
+                        value={edit.fab_year || ""}
+                        disabled={true}
+                        type="text"
+                        placeholder="Fab Year"
+                        className="input input-bordered w-full"
+                      />
+                    )}
                   </div>
                   {/* project code */}
                   <div>
@@ -499,6 +670,7 @@ const ContentRight = () => {
                     />
                   </div>
 
+                  {/* serial number */}
                   <div>
                     {isLoadingComponent ? (
                       <FadeLoader
@@ -525,6 +697,9 @@ const ContentRight = () => {
                                     type="checkbox"
                                     className="checkbox"
                                     name="serial"
+                                    checked={selectedSerialNumber.includes(
+                                      item
+                                    )} // Kiểm tra nếu item đã có trong selectedSerialNumber
                                     value={item}
                                     onChange={(event) =>
                                       getSelectedSerialNumber(event)
@@ -565,6 +740,11 @@ const ContentRight = () => {
                                         id={serial.toString() + component}
                                         name={serial.toString()}
                                         value={component}
+                                        checked={selectedComponent.some(
+                                          (item: any) =>
+                                            item.serial_no === serial &&
+                                            item.components.includes(component)
+                                        )}
                                         onChange={(event) =>
                                           getSelectedComponent(event, serial)
                                         }
@@ -585,6 +765,9 @@ const ContentRight = () => {
                                   onChange={(event) =>
                                     getSelectedComponents(event, serial)
                                   }
+                                  checked={additionalComponents?.some(
+                                    (item: any) => item.serial_no === serial
+                                  )}
                                 />
                                 <span className="label-text ">
                                   Other option
@@ -600,6 +783,11 @@ const ContentRight = () => {
                                     className="input input-bordered w-full"
                                     onChange={(event) =>
                                       getAdditionalComponents(event, serial)
+                                    }
+                                    value={
+                                      additionalComponents?.find(
+                                        (item: any) => item.serial_no === serial
+                                      )?.additional_component
                                     }
                                   />
                                   {errors[serial] && (
@@ -628,8 +816,7 @@ const ContentRight = () => {
                       onChange={(event) =>
                         setEdit((prev: any) => ({
                           ...prev,
-                          contact_person:
-                            event.target.value || edit.contact_person,
+                          contact_person: event.target.value,
                         }))
                       }
                       type="text"
@@ -650,7 +837,7 @@ const ContentRight = () => {
                       onChange={(event) =>
                         setEdit((prev: any) => ({
                           ...prev,
-                          driver_mode: event.target.value || edit.driver_mode,
+                          driver_mode: event.target.value,
                         }))
                       }
                       className="select select-bordered w-full"
@@ -678,8 +865,7 @@ const ContentRight = () => {
                       onChange={(event) =>
                         setEdit((prev: any) => ({
                           ...prev,
-                          contact_number:
-                            event.target.value || edit.contact_number,
+                          contact_number: event.target.value,
                         }))
                       }
                       type="text"
@@ -699,7 +885,7 @@ const ContentRight = () => {
                       onChange={(event) =>
                         setEdit((prev: any) => ({
                           ...prev,
-                          client_ref: event.target.value || edit.client_ref,
+                          client_ref: event.target.value,
                         }))
                       }
                       type="text"
@@ -719,7 +905,7 @@ const ContentRight = () => {
                       onChange={(event) =>
                         setEdit((prev: any) => ({
                           ...prev,
-                          remark: event.target.value || edit.remark,
+                          remark: event.target.value,
                         }))
                       }
                       type="text"

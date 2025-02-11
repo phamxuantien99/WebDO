@@ -59,7 +59,6 @@ const HomeLeftComponent = () => {
   const [contactPerson, setContactPerson] = useState<string>("");
   const [yourRef, setYourRef] = useState<string>("");
   const [contactNumber, setContactNumber] = useState<string>("");
-  const [driver, setDriver] = useState<string>("");
   const [remark, setRemark] = useState<string>("");
   const [selectedComponent, setSelectedComponent] = useState<any>([]);
 
@@ -353,10 +352,11 @@ const HomeLeftComponent = () => {
             remark,
             filteredDate
           ),
-          payload
-          // { headers }
+          payload,
+          { headers }
         )
         .then((res: any) => {
+          console.log("data", res.data);
           navigation("/home/invoice", { state: res.data });
         })
         // .then((res: any) => {

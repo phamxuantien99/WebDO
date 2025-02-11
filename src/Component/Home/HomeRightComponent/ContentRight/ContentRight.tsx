@@ -232,13 +232,13 @@ const ContentRight = () => {
 
   const getAdditionalComponents = (
     e: React.ChangeEvent<HTMLInputElement>,
-    serial: string
+    serial: any
   ) => {
     const value = e.target.value;
 
     // Tìm xem serial_no đã tồn tại trong mảng chưa
     const objIndex = additionalComponents.findIndex(
-      (obj) => obj.serial_no === serial
+      (obj: any) => obj.serial_no === serial
     );
 
     let newArray = [...additionalComponents];

@@ -1,14 +1,13 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { axiosInstanceV2 } from "../../service/hooks/axiosInstance";
-import { CSSProperties, useContext, useEffect, useRef, useState } from "react";
-import AuthContext, { AuthContextType } from "../../context/AuthProvider";
-import { api } from "../../service/api/endpoint";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import SerinalNo from "./SerinalNo/SerinalNo";
+import { CSSProperties, useContext, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FadeLoader } from "react-spinners";
-import { override } from "../Invoice/Invoice";
+import AuthContext, { AuthContextType } from "../../context/AuthProvider";
+import { api } from "../../service/api/endpoint";
+import { axiosInstanceV2 } from "../../service/hooks/axiosInstance";
+import SerinalNo from "./SerinalNo/SerinalNo";
 
 export const overrideSerial: CSSProperties = {
   display: "flex",
@@ -65,8 +64,6 @@ const EditProjectExample = () => {
   const [additionalComponents, setAdditionalComponents] = useState<any>([]);
   const [dataTotalComponent, setDataTotalComponent] = useState<any>([]);
 
-  console.log({ selectedSerialNumber });
-
   const fetchFabYearById = async (invoice_id: number) => {
     try {
       const response = await axiosInstanceV2.get(
@@ -89,8 +86,6 @@ const EditProjectExample = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!numbericId, // API chỉ được gọi khi edit.fab_year không phải là chuỗi rỗng
   });
-
-  console.log({ dataFabYear });
 
   useEffect(() => {
     const dateSplit = dataDetail["created_at"].split("/");

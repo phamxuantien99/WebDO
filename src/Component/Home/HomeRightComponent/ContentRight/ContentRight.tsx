@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CSSProperties,
   useContext,
@@ -14,12 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FadeLoader } from "react-spinners";
 import AuthContext, { AuthContextType } from "../../../context/AuthProvider";
 import { api } from "../../../service/api/endpoint";
-import {
-  axiosInstance,
-  axiosInstanceV2,
-} from "../../../service/hooks/axiosInstance";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounce } from "../../../service/hooks/useDebounce";
+import { axiosInstanceV2 } from "../../../service/hooks/axiosInstance";
 
 const override: CSSProperties = {
   display: "flex",
@@ -254,8 +250,6 @@ const ContentRight = () => {
     setAdditionalComponents(newArray);
   };
 
-  console.log({ object: additionalComponents });
-
   // call api get fab year by id
   const fetchFabYearById = async (invoice_id: number) => {
     try {
@@ -285,9 +279,6 @@ const ContentRight = () => {
       }));
     }
   }, [dataFabYear]);
-
-  console.log("fab year", dataFabYear);
-  console.log("object", edit.fab_year);
 
   // call api get component by project code
   const fetchDataLogisticComponent = async (
@@ -486,8 +477,6 @@ const ContentRight = () => {
     document.getElementById("close")?.click();
     setEdit(defaultEdit);
   };
-
-  console.log("invoice_id", edit.invoice_id);
 
   const updateInvoiceFormRef = useRef(null);
 
@@ -1110,7 +1099,22 @@ const ContentRight = () => {
                         <RiDeleteBin6Line size={16} />
                       </button>
 
-                      {getRoleAdmin && <>{renderUpdateModal(item)}</>}
+                      {/* {getRoleAdmin && <>{renderUpdateModal(item)}</>} */}
+                      <button
+                        onClick={() => {
+                          navigate(`/home/update/${item["invoice_id"]}`, {
+                            state: item,
+                          });
+                        }}
+                        className={`btn modal-button btn-square btn-sm ${
+                          item["loading_sign"] !== null ||
+                          item["unload_sign"] !== null
+                            ? "btn-disabled"
+                            : ""
+                        }`}
+                      >
+                        <BsPenFill size={16} />
+                      </button>
                     </div>
                   </td>
 

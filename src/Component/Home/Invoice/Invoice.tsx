@@ -10,7 +10,7 @@ import { axiosInstanceV2 } from "../../service/hooks/axiosInstance";
 import UseRefreshToken from "../../service/hooks/useRefreshToken";
 import "./InvoiceStyle.css";
 
-const override: CSSProperties = {
+export const override: CSSProperties = {
   display: "flex",
   margin: "500px auto",
   borderColor: "red",

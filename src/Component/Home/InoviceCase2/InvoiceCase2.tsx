@@ -1,9 +1,9 @@
-import React, { CSSProperties, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FcPrint } from "react-icons/fc";
 import { useLocation } from "react-router-dom";
-import "./InvoiceCase2Style.css";
 import { useReactToPrint } from "react-to-print";
 import logo2 from "../../../assets/images/logo2.png";
+import "./InvoiceCase2Style.css";
 
 const header = [
   "No.",
@@ -39,7 +39,7 @@ function InvoiceCase2() {
   const data = useLocation().state;
   const [showText, setShowText] = useState(false);
   const invoiceContentRef = useRef<any>();
-  console.log({ data });
+
   const _handlePrint = useReactToPrint({
     content: () => invoiceContentRef.current,
     documentTitle: "Statement",

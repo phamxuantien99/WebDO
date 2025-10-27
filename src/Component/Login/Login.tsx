@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { api } from "../service/api/endpoint";
 import logo1 from "../../assets/images/logo1.png";
+import { axiosInstance } from "../service/hooks/axiosInstance";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    axios
+    axiosInstance
       .post(api.getLogin, {
         user_name: username,
         password: password,

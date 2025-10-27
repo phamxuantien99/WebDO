@@ -72,8 +72,6 @@ const ContentRight = () => {
 
   const queryClient = useQueryClient();
 
-  const getRoleAdmin = localStorage.getItem("authUser");
-
   const handleSearch = (value: string) => {
     setSearchQuery(value);
   };
@@ -209,22 +207,6 @@ const ContentRight = () => {
       setAdditionalComponents(payload);
     }
   };
-
-  // console.log({ additionalComponents });
-
-  // get additional component
-  // const getAdditionalComponents = (e: any, serial: any) => {
-  //   const objIndex = additionalComponents.findIndex(
-  //     (obj: any) => obj.serial_no === serial
-  //   );
-  //   let newArray = [...additionalComponents];
-  //   if (e.target.value !== "") {
-  //     newArray[objIndex].additional_component = e.target.value;
-  //   } else {
-  //     newArray[objIndex].additional_component = "";
-  //   }
-  //   setAdditionalComponents(newArray);
-  // };
 
   const getAdditionalComponents = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -551,8 +533,6 @@ const ContentRight = () => {
       setIsLoadingDelete(false);
     }
   };
-
-  // console.log({ listSerialNumber });
 
   const renderUpdateModal = (item: any) => {
     return (
@@ -1255,12 +1235,18 @@ const ContentRight = () => {
               {!isLoadingData &&
                 (dataAnalysis?.founds?.length === 0 ||
                   dataAnalysis?.list_component?.length === 0) && (
-                  <td colSpan={header.length + 2} className={"text-center"}>
+                  <td
+                    colSpan={header.length + 2}
+                    className={"text-center text-red-500"}
+                  >
                     No results
                   </td>
                 )}
               {isLoadingData && (
-                <td colSpan={header.length + 2} className={"text-center"}>
+                <td
+                  colSpan={header.length + 2}
+                  className={"text-center text-red-500"}
+                >
                   <FadeLoader
                     loading={isLoadingData}
                     cssOverride={override}
@@ -1270,6 +1256,17 @@ const ContentRight = () => {
                   />
                 </td>
               )}
+            </tr>
+            <tr>
+              {!isLoadingData &&
+                dataAnalysis?.error === "Permission denied" && (
+                  <td
+                    colSpan={header.length + 2}
+                    className="text-center text-red-500"
+                  >
+                    You do not have permission to access this data.
+                  </td>
+                )}
             </tr>
           </tbody>
         </table>

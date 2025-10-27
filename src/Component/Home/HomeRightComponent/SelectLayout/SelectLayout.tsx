@@ -39,8 +39,35 @@ const SelectLayout = () => {
         { headers }
       );
       return response.data;
-    } catch (error) {
-      return { error: "Failed to fetch data" };
+    } catch (error: any) {
+      if (error.response) {
+        const statusCode = error.response.status;
+
+        if (statusCode === 403) {
+          return { error: "Permission denied" };
+        }
+
+        if (statusCode === 401) {
+          console.error("Unauthorized (401)");
+          return { error: "Unauthorized. Please log in again." };
+        }
+
+        if (statusCode === 500) {
+          console.error("Internal server error (500)");
+          return { error: "Internal server error. Please try again later." };
+        }
+
+        console.error("API error:", error.response.data);
+        return { error: error.response.data?.detail || "API error occurred." };
+      } else if (error.request) {
+        console.error("No response from server:", error.request);
+        return {
+          error: "No response from server. Please check your connection.",
+        };
+      } else {
+        console.error("Unexpected error:", error.message);
+        return { error: "Unexpected error occurred." };
+      }
     }
   };
 

@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 const BASE_URL = "https://ec2api.deltatech-backend.com/api/v1";
-const BASE_URLV2 = "https://ec2api.deltatech-backend.com/api/v2";
+const BASE_URLV2 = "https://ec2api.deltatech-backend.com/api/v3";
 
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   _retry?: boolean;

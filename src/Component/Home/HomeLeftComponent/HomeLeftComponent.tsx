@@ -338,8 +338,6 @@ const HomeLeftComponent = () => {
     };
 
     if (validateOptionsSerial()) {
-      // Submit form nếu không có lỗi
-
       axiosInstanceV2
         .post(
           api.postGenInvoiceV21(
@@ -359,17 +357,23 @@ const HomeLeftComponent = () => {
           console.log("data", res.data);
           navigation("/home/invoice", { state: res.data });
         })
-        // .then((res: any) => {
-        //   console.log("data", res);
-        // })
         .catch((e) => {
-          if ((e.response.status = 409)) {
-            alert(e.response.data.detail);
-          } else if ((e.response.status = 500)) {
-            console.log("internal server error");
+          if (e.response) {
+            if (e.response.status === 403) {
+              alert("You do not have permission to generate an invoice.");
+            } else if (e.response.status === 409) {
+              alert(e.response.data.detail);
+            } else if (e.response.status === 500) {
+              console.log("Internal server error");
+            } else {
+              alert(
+                "Something went wrong, please try again => HomeLeft Component"
+              );
+            }
           } else {
+            console.error("Network or unknown error:", e);
             alert(
-              "Something went wrong, please try again => HomeLeft Component"
+              "Unable to connect to the server. Please check your network."
             );
           }
         })

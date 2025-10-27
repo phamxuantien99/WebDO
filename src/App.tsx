@@ -1,11 +1,10 @@
 import { Route, Routes } from "react-router-dom";
 import withAuth from "./Component/com/RequiredAuth";
-import Login from "./Component/Login/Login";
-import Home from "./Component/Home/Home";
-import Invoice from "./Component/Home/Invoice/Invoice";
-import InvoiceCase2 from "./Component/Home/InoviceCase2/InvoiceCase2";
-import EditProject from "./Component/Home/HomeRightComponent/EditProject/EditProject";
 import EditProjectExample from "./Component/Home/EditProjectExample/EditProjectExample";
+import Home from "./Component/Home/Home";
+import InvoiceCase2 from "./Component/Home/InoviceCase2/InvoiceCase2";
+import Invoice from "./Component/Home/Invoice/Invoice";
+import Login from "./Component/Login/Login";
 
 function App() {
   const ProtectedComponent = withAuth(Home);
